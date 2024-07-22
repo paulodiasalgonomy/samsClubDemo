@@ -1,53 +1,75 @@
 <script defer="defer">
-console.log('client.js injected via GTM v.02');
-var R3_COMMON = {};
-R3_COMMON.apiKey = '104342ec1e1f838c';
-R3_COMMON.apiClientKey = '2124d85b64906a83';
-R3_COMMON.sessionId = 'gtm1234';
-R3_COMMON.userId = 'gtm123';
-
-// Function to set R3_COMMON values based on URL
-function setR3CommonValues(url) {
-    // Root URL pattern
-    if (url.match(/^https?:\/\/[^\/]+\/$/)) {
-        R3_COMMON.placements = 'home_page';
-    } 
-    // Category page pattern
-    else if (url.match(/\/c\/[^\/]+\/(\d+)\?/)) {
-        R3_COMMON.placements = 'category_page';
-        R3_COMMON.categoryId = url.match(/\/c\/[^\/]+\/(\d+)\?/)[1];
-    } 
-    // Item page pattern
-    else if (url.match(/\/p\/[^\/]+\/P(\d+)\?/)) {
-        R3_COMMON.placements = 'item_page';
-        R3_COMMON.productId = url.match(/\/p\/[^\/]+\/P(\d+)\?/)[1];
-    } 
-    // Search page pattern
-    else if (url.match(/\/s\/([^?]+)\??/)) {
-        R3_COMMON.placements = 'search_page';
-        R3_COMMON.searchTerm = decodeURIComponent(url.match(/\/s\/([^?]+)\??/)[1].replace(/%20/g, ' '));
-    } else {
-        console.warn('URL pattern not recognized. Defaulting to home_page.');
-        R3_COMMON.placements = 'generic_page';
+    console.log('client.js injected via GTM v.03');
+    var R3_COMMON = {};
+    R3_COMMON.apiKey = '104342ec1e1f838c';
+    R3_COMMON.apiClientKey = '2124d85b64906a83';
+    R3_COMMON.userId = '';
+    
+    // Function to get a cookie by name
+    function getCookie(name) {
+        let matches = document.cookie.match(new RegExp(
+            "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+        ));
+        return matches ? decodeURIComponent(matches[1]) : undefined;
     }
-}
-
-// Get the current URL
-var currentUrl = window.location.href;
-setR3CommonValues(currentUrl);
-
-console.log(R3_COMMON);
-
-var xhr = new XMLHttpRequest();
-xhr.open('GET', 'https://cdn.algorecs.com/dashboard/applications/clientjs/2.1/client.js', true);
-xhr.onreadystatechange = function () {
-    if (xhr.readyState === 4 && xhr.status === 200) {
-        var script = document.createElement('script');
-        script.text = xhr.responseText;
-        document.head.appendChild(script);
-    } else if (xhr.readyState === 4) {
-        console.error('Error loading script:', xhr.statusText);
+    
+    // Function to generate a random string
+    function generateRandomString(length) {
+        let result = '';
+        let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let charactersLength = characters.length;
+        for (let i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
     }
-};
-xhr.send();
-</script>
+    
+    // Set R3_COMMON.sessionId
+    R3_COMMON.sessionId = getCookie('bstc') || generateRandomString(16);
+    
+    // Function to set R3_COMMON values based on URL
+    function setR3CommonValues(url) {
+        // Root URL pattern
+        if (url.match(/^https?:\/\/[^\/]+\/$/)) {
+            R3_COMMON.placements = 'home_page';
+        } 
+        // Category page pattern
+        else if (url.match(/\/c\/[^\/]+\/(\d+)\?/)) {
+            R3_COMMON.placements = 'category_page';
+            R3_COMMON.categoryId = url.match(/\/c\/[^\/]+\/(\d+)\?/)[1];
+        } 
+        // Item page pattern
+        else if (url.match(/\/p\/[^\/]+\/P(\d+)\?/)) {
+            R3_COMMON.placements = 'item_page';
+            R3_COMMON.productId = url.match(/\/p\/[^\/]+\/P(\d+)\?/)[1];
+        } 
+        // Search page pattern
+        else if (url.match(/\/s\/([^?]+)\??/)) {
+            R3_COMMON.placements = 'search_page';
+            R3_COMMON.searchTerm = decodeURIComponent(url.match(/\/s\/([^?]+)\??/)[1].replace(/%20/g, ' '));
+        } else {
+            console.warn('URL pattern not recognized. Defaulting to generic_page.');
+            R3_COMMON.placements = 'generic_page';
+        }
+    }
+    
+    // Get the current URL
+    var currentUrl = window.location.href;
+    setR3CommonValues(currentUrl);
+    
+    console.log(R3_COMMON);
+    
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'https://cdn.algorecs.com/dashboard/applications/clientjs/2.1/client.js', true);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            var script = document.createElement('script');
+            script.text = xhr.responseText;
+            document.head.appendChild(script);
+        } else if (xhr.readyState === 4) {
+            console.error('Error loading script:', xhr.statusText);
+        }
+    };
+    xhr.send();
+    </script>
+    
